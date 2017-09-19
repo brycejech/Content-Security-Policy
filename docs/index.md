@@ -1,4 +1,3 @@
-
 # Content Security Policy (CSP)
 
 ## What is CSP?
@@ -64,22 +63,22 @@ Keyword         | Meaning
 
 CSPs can include any of the following directives
 
-Directive | Meaning
---------- | -------
-base-uri | Restricts URLs that can appear in the `<base>` element
-child-src | Restricts URLs for workers and frames. `child-src: https://youtube.com` would allow frames to be loaded from youtube.com, but not from any other origins.
-connect-src | Restricts origins to which you can connect via XMLHTTPRequests (XHR), WebSockets, and EventSource.
-font-src | Restricts origins from which fonts may be loaded
-form-action | Restricts endpoints for form submissions
-frame-ancestors | Restricts origins from which the current page may be loaded in a frame element. Applies to `<frame>`, `<iframe>`, `<embed>`, and `<applet>`.
-frame-src | DEPRECATED, use child-src.
-img-src | Restricts origins from which images can be loaded.
-media-src | Restricts origins from which `<video>` and `<audio>` can be loaded.
-object-src
-plugin-types
-report-uri
-style-src
-upgrade-insecure-requests
+Directive                 | Meaning
+------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------
+base-uri                  | Restricts URLs that can appear in the `<base>` element
+child-src                 | Restricts URLs for workers and frames. `child-src: https://youtube.com` would allow frames to be loaded from youtube.com, but not from any other origins.
+connect-src               | Restricts origins to which you can connect via XMLHTTPRequests (XHR), WebSockets, and EventSource.
+font-src                  | Restricts origins from which fonts may be loaded
+form-action               | Restricts endpoints for form submissions
+frame-ancestors           | Restricts origins from which the current page may be loaded in a frame element. Applies to `<frame>`, `<iframe>`, `<embed>`, and `<applet>`.
+frame-src                 | DEPRECATED, use child-src.
+img-src                   | Restricts origins from which images can be loaded.
+media-src                 | Restricts origins from which `<video>` and `<audio>` can be loaded.
+object-src                | Allows control of Flash and other plugins
+plugin-types              | Limits the types of plugins a page may invoke
+report-uri                | URL to which the browser will send CSP report violations
+style-src                 | Restricts origins from which stylesheets may be loaded
+upgrade-insecure-requests | Instructs browsers to re-write URLs from http to https (useful for legacy sites with a lot of URLs that need to be re-written).
 
 ## CSP Report-Only Mode
 
