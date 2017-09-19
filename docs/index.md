@@ -46,7 +46,7 @@ Some common HTTP request headers include `Host`, `User-Agent`, `Referrer`, `Auth
 
 Some common HTTP response headers include `Server`, `Content-Type`, `Content-Length`, `Set-Cookie`, `Date`, `Expires`, and many others.
 
-## Leveraging CSP to Defend Against XSS Attacks
+## CSP Keywords and Directives
 
 Currently, the most widely supported version of CSP is version 2. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited, more on that later).
 
@@ -60,6 +60,8 @@ Keyword         | Meaning
 'self'          | Refers to the current origin (excluding subdomains)
 'unsafe-inline' | Allows inline JS and CSS
 'unsafe-eval'   | Allows text to be evaluated as JS
+
+Note that inline JavaScript and CSS as well as the use of function calls such as eval are considered unsafe and prefixed accordingly.
 
 CSPs can include any of the following directives
 
@@ -79,6 +81,12 @@ plugin-types              | Limits the types of plugins a page may invoke
 report-uri                | URL to which the browser will send CSP report violations
 style-src                 | Restricts origins from which stylesheets may be loaded
 upgrade-insecure-requests | Instructs browsers to re-write URLs from http to https (useful for legacy sites with a lot of URLs that need to be re-written).
+
+## Leveraging CSP to Defend Against XSS Attacks
+
+HTML `style` attributes as well as `<style>` tags are considered inline styles and will not be evaluated unless the `style-src: 'unsafe-inline'` directive is specified.
+
+HTML `onclick`, `onhover`, `onload`, `onerror` and similar attributes as well as `<script>` tags are considered inline script and will not be evaluated unless the `script-src: 'unsafe-inline'` directive is specified.
 
 ## CSP Report-Only Mode
 
