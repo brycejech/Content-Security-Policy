@@ -6,9 +6,11 @@ Content Security Policy (CSP) is an added layer of security that helps to detect
 
 [Content Security Policy on MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 
-A content security policy allows us to instruct the browser on the origins that scripts, images, iframes, and other web resources are allowed to be loaded and interpreted for any given web page.
+A content security policy allows us to instruct the browser on the origins from which scripts, images, iframes, and other web resources are allowed to be loaded and executed for any given web page.
 
-A CSP applies to a single web page only, it can be unique for a single page or consistent across an entire site. CSPs can also be combined; in the case of multiple CSPs, browsers will attempt to honor all of them.
+A CSP should not be your only layer of defense against XSS attacks. User input should still never be trusted and always be sanitized. However, when leveraged correctly, a robust content security policy can be an extremely versatile addition to your defense in depth strategy.
+
+A CSP applies to a single web page only, it can be unique for a single page or consistent across an entire site. CSPs can also be combined; in the case of multiple CSPs, browsers will attempt to honor all of them. Note that the policy can only get more restrictive, not less, if multiple CSP headers are specified.
 
 A CSP gives us very fine control over the origins from which web resources can be loaded (including our own).
 
@@ -34,7 +36,9 @@ According to the Open Web Application Security Project (OWASP), XSS was the thir
 
 #### XSS Example
 
-A common example of an XSS attack is when an attacker is allowed to submit data to a server, typically as part of an HTTP POST or GET request, that is saved to a datastore and later interpreted (as HTML or JavaScript) on a webpage that other users (victims) will see. This is an example of a stored XSS Attack.
+A common example of an XSS attack is when an attacker is allowed to submit data to a server, typically as part of an HTTP POST or GET request, that is saved to a datastore and later interpreted (as HTML or JavaScript) on a webpage that other users (victims) will see. This is an example of a stored XSS Attack; other examples include Reflected XSS and Dom Based XSS.
+
+[XSS on OWASP](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS))
 
 ### What are HTTP headers?
 
@@ -48,44 +52,55 @@ Some common HTTP response headers include `Server`, `Content-Type`, `Content-Len
 
 ## CSP Keywords and Directives
 
-Currently, the most widely supported version of CSP is version 2. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited, more on that later).
+Currently, the most widely supported version of CSP is version 2\. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited, more on that later).
 
 A CSP header allows us to define a whitelist of approved sources for a given resource.
 
 Let's look at a few simple examples, and explain what each does.
 
-```YAML
+```yaml
 # Restrict all content to the site's origin (excluding subdomains)
 Content-Security-Policy: default-src 'self'
 
-# Restrict JS and CSS to trusted.com and all it's subdomains, all other content restricted to the sites own origin
-# Note that values are not inherited. Any directive completely overwrites the default for that type of resource.
-# So, in this example, scripts and style would not be allowed inline or from the current origin, only trusted.com and any of it's subdomains
+# Restrict JS and CSS to trusted.com and all it's subdomains, all
+# other content restricted to the sites own origin
+# Note that values are not inherited. Any directive completely
+# overwrites the default for that type of resource.
+# So, in this example, scripts and style would not be allowed inline or
+# from the current origin, only trusted.com and any of it's subdomains
 Content-Security-Policy: default-src 'self'; script-src *.trusted.com; style-src *.trusted.com
 
+# A more restrictive example.
+# This would allow scripts, styles, and images to load from the
+# current origin, and block everything else
+Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'
 ```
 
 There are a few keywords, such as `'self'`, that have special meaning.
 
 Keyword         | Meaning
---------------- | ---------------------------------------------------
+--------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------
 'none'          | Matches nothing
 'self'          | Refers to the current origin (excluding subdomains)
 'unsafe-inline' | Allows inline JS and CSS
 'unsafe-eval'   | Allows text to be evaluated as JS
+data:           | Allows loading resources via the data scheme such as a base 64 image src
+https:          | Restrict resources to https:
+`nonce-`        | script or style tags can be evaluated if their `nonce` attribute matches the header value `<script nonce="1234qwerasdf">alert('Hello World!')</script>`
+`sha256-`       | Allow a script or style to execute if it matches the specified sha256 hash.
 
-Note that inline JavaScript and CSS as well as the use of function calls such as eval are considered unsafe and prefixed accordingly.
+Note that inline JavaScript and CSS as well as the use of function calls such as eval are considered unsafe and prefixed accordingly. Note that `unsafe-eval` also applies to functions other than `eval()`; it also applies to `new Function()` and `setTimeout()` because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
 
 CSPs can include any of the following directives
 
 Directive                 | Meaning
-------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 base-uri                  | Restricts URLs that can appear in the `<base>` element
 child-src                 | Restricts URLs for workers and frames. `child-src: https://youtube.com` would allow frames to be loaded from youtube.com, but not from any other origins.
 connect-src               | Restricts origins to which you can connect via XMLHTTPRequests (XHR), WebSockets, and EventSource.
 font-src                  | Restricts origins from which fonts may be loaded
 form-action               | Restricts endpoints for form submissions
-frame-ancestors           | Restricts origins from which the current page may be loaded in a frame element. Applies to `<frame>`, `<iframe>`, `<embed>`, and `<applet>`.
+frame-ancestors           | Restricts origins from which the current page may be loaded in a frame element. Applies to `<frame>`, `<iframe>`, `<embed>`, and `<applet>`. Setting this to `'none'` is roughly equivalent to `X-Frame-Options: DENY`.
 frame-src                 | DEPRECATED, use child-src.
 img-src                   | Restricts origins from which images can be loaded.
 media-src                 | Restricts origins from which `<video>` and `<audio>` can be loaded.
@@ -104,3 +119,13 @@ HTML `onclick`, `onhover`, `onload`, `onerror` and similar attributes as well as
 ## CSP Report-Only Mode
 
 ## Browser Support
+
+
+Header                                 | Firefox | Chrome | Safari | IE            | Edge
+-------------------------------------- | ------- | ------ | ------ | ------------- | ---------------
+Content-Security-Policy `v2`           | 31+     | 40+    | 10+    | -             | 15 build 15002+
+Content-Security-Policy `v1`           | 23+     | 25+    | 7+     | -             | 12 build 10240+
+X-Content-Security-Policy `deprecated` | 4+      | -      | -      | 10+ _limited_ | 12+ _limited_
+X-Webkit-CSP `deprecated`              | -       | 14+    | 6+     | -             | -
+
+[Test if your browser supports CSP](https://content-security-policy.com/browser-test/)
