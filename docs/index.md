@@ -32,7 +32,7 @@ Some common HTTP response headers include `Server`, `Content-Type`, `Content-Len
 
 ## Using the `Content-Security-Policy` Header
 
-Currently, the most widely supported version of CSP is version 2. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited; more on that later).
+Currently, the most widely supported version of CSP is version 2\. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited; more on that later).
 
 To use a CSP, we must configure our server to return the `Content-Security-Policy` HTTP header:
 
@@ -43,21 +43,25 @@ Content-Security-Policy: <policy>
 ### Setting the `Content-Security-Policy` header in popular web servers
 
 #### Nginx
+
 In the `server{ }` block in the `nginx.conf` file, add the following:
 
-```Nginx
+```nginx
 add_header Content-Security-Policy "<your policy>";
 ```
 
 #### Apache
+
 In the `httpd.conf` file for the host or in an `.htaccess` file, add:
-```Apache
+
+```apache
 Header set Content-Security-Policy "<your policy>"
 ```
 
 #### IIS
 
 In your `web.config` file, add the following to your `<system.webServer>` node:
+
 ```xml
 <system.webServer>
     <httpProtocol>
@@ -124,7 +128,7 @@ Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'
 
 ### Why is the use of inline JavaScript and CSS considered unsafe?
 
-Browsers do not have any way to tell trusted from untrusted inline code; they cannot see the difference between your inline and code and unsafe code from an attacker that may have been rendered into the page without being properly sanitized.
+Browsers do not have any way to tell trusted from untrusted inline code; they cannot see the difference between your inline code and unsafe code from an attacker that may have been rendered into the page without being properly sanitized.
 
 Therefore, when a CSP is enabled and the `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'` directives are not specified, inline JavaScript and CSS evaluation are blocked.
 
@@ -134,15 +138,15 @@ HTML `onclick`, `onhover`, `onload`, `onerror` and similar attributes are consid
 
 The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe and blocked unless this value is set.
 
-`unsafe-eval` also applies to functions other than `eval()`; it applies to `new Function()` and `setTimeout()` as well because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
+`eval()`, `setTimeout(string)`, and `new Function()` are blocked because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
 
 ## CSP Keywords and Directives
 
 There are a few keywords, such as `'self'`, that have special meaning.
 
 Keyword         | Meaning
---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------
-'none'          | Matches nothing
+--------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------
+'none'          | Matches nothing, blocks use of the specified source
 'self'          | Refers to the current origin (excluding subdomains)
 'unsafe-inline' | Allows inline JS and CSS (unsafe)
 'unsafe-eval'   | Allows text to be evaluated as JS (unsafe)
@@ -154,30 +158,32 @@ https:          | Restrict resources to https:
 CSPs can include any of the following directives
 
 Directive                 | Meaning
-------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-base-uri                  | Restricts URLs that can appear in the `<base>` element
-child-src                 | Restricts URLs for workers and frames. `child-src: https://youtube.com` would allow frames to be loaded from youtube.com, but not from any other origins.
-connect-src               | Restricts origins to which you can connect via XMLHTTPRequests (XHR), WebSockets, and EventSource.
+------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+default-src               | Used as a fallback for unspecified directives
+script-src                | Restricts origins from which scripts can be loaded
+style-src                 | Restricts origins from which stylesheets may be loaded
+img-src                   | Restricts origins from which images can be loaded
+connect-src               | Restricts origins to which you can connect via XMLHTTPRequests (XHR), WebSockets, and EventSource
 font-src                  | Restricts origins from which fonts may be loaded
 form-action               | Restricts endpoints for form submissions
-frame-ancestors           | Restricts origins from which the current page may be loaded in a frame element. Applies to `<frame>`, `<iframe>`, `<embed>`, and `<applet>`. Setting this to `'none'` is roughly equivalent to `X-Frame-Options: DENY`.
-frame-src                 | DEPRECATED, use child-src.
-img-src                   | Restricts origins from which images can be loaded.
-media-src                 | Restricts origins from which `<video>` and `<audio>` can be loaded.
+frame-ancestors           | Restricts origins from which the current page may be loaded in a frame element. Applies to `<frame>`, `<iframe>`, `<embed>`, and `<applet>`. Setting this to `'none'` is roughly equivalent to `X-Frame-Options: DENY`
 object-src                | Allows control of Flash and other plugins
+media-src                 | Restricts origins from which `<video>` and `<audio>` can be loaded
+frame-src                 | DEPRECATED, use child-src
+child-src                 | Restricts URLs for workers and frames. `child-src: https://youtube.com` would allow frames to be loaded from youtube.com, but not from any other origins.
+base-uri                  | Restricts URLs that can appear in the `<base>` element
 plugin-types              | Limits the types of plugins a page may invoke
-report-uri                | URL to which the browser will send CSP report violations
-style-src                 | Restricts origins from which stylesheets may be loaded
-upgrade-insecure-requests | Instructs browsers to re-write URLs from http to https (useful for legacy sites with a lot of URLs that need to be re-written).
+report-uri                | URL to which the browser will POST policy violations
+upgrade-insecure-requests | Instructs browsers to re-write URLs from http to https (useful for legacy sites with a lot of URLs that need to be re-written)
 
-## Leveraging CSP to Defend Against XSS Attacks
+
+## Using the `report-uri` directive to collect policy violations
 
 
 
 ## CSP Report-Only Mode
 
 ## Browser Support
-
 
 Header                                 | Firefox | Chrome | Safari | IE            | Edge
 -------------------------------------- | ------- | ------ | ------ | ------------- | ---------------
