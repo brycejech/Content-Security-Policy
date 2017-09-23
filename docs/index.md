@@ -6,7 +6,7 @@ Content Security Policy (CSP) is an added layer of security that helps to detect
 
 [Content Security Policy on MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 
-A content security policy allows us to instruct the browser on the origins from which scripts, images, iframes, and other web resources are allowed to be loaded and executed for any given web page.
+A content security policy allows us to instruct the browser on the origins from which scripts, styles, images, iframes, and other web resources are allowed to be loaded and executed for any given web page.
 
 A CSP should not be your only layer of defense against XSS attacks. User input should still never be trusted and always be sanitized. However, when leveraged correctly, a robust content security policy can be an extremely versatile addition to your defense in depth strategy.
 
@@ -70,7 +70,7 @@ In your `web.config` file, add the following to your `<system.webServer>` node:
 
 Popular web frameworks also provide interfaces through which you can set custom headers. However, if you plan to have a single policy for your entire site, the recommended approach would be to add the `Content-Security-Policy` header directly via the web server.
 
-If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag:
+If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag inside the document `<head>`:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="<your policy>" />
@@ -78,12 +78,25 @@ If you do not have access to set HTTP response headers on your server, a CSP can
 
 ## CSP Examples
 
+A CSP header allows us to define a whitelist of approved sources for a given resource, giving us very fine control over the origins from which web resources can be loaded (including our own).
+
+A CSP applies to a single web page only, it can be unique for a single page or consistent across an entire site. CSPs can also be combined; in the case of multiple CSPs, browsers will attempt to honor all of them. Note that if multiple CSP headers are specified, the policy can only get more restrictive, not less.
+
 Before we look at a comprehensive list of CSP keywords and directives, let's look at a few examples.
 
 ```yaml
 # Restrict all content to the site's origin (excluding subdomains)
 Content-Security-Policy: default-src 'self';
 ```
+
+```yaml
+# Restrict JavaScript to be loaded via https: from the current origin, allow inline script (unsafe)
+# Restrict CSS to load via https: from the current origin, allow inline styles (unsafe)
+# Restrict all other content to be loaded from the current origin
+Content-Security-Policy: default-src 'self'; script-src https: 'self' 'unsafe-inline'; style-src https: 'self' 'unsafe-inline';
+```
+
+Note that inline script and styles (as well as the use of functions such as `eval()`) are considered unsafe. Try to avoid using inline styles and scripts unless absolutely necessary.
 
 ```yaml
 # Restrict JS to https: via trusted.com (including subdomains)
@@ -109,13 +122,21 @@ Content-Security-Policy: default-src https: 'self'; script-src https://mydomain.
 Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'
 ```
 
+### Why is the use of inline JavaScript and CSS considered unsafe?
+
+Browsers do not have any way to tell trusted from untrusted inline code; they cannot see the difference between your inline and code and unsafe code from an attacker that may have been rendered into the page without being properly sanitized.
+
+Therefore, when a CSP is enabled and the `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'` directives are not specified, inline JavaScript and CSS evaluation are blocked.
+
+HTML `style` attributes as well as `<style>` tags are considered inline styles and will not be evaluated unless the `style-src: 'unsafe-inline'` directive is specified.
+
+HTML `onclick`, `onhover`, `onload`, `onerror` and similar attributes are considered inline script and are not evaluated unless the `script-src 'unsafe-inline'` directive is specified. `<script>` tags are also considered inline script and follow the same rule. However, an inline script tag may also be evaluated if it has a valid `nonce-` value, or if it matches an already specified `sha256-` hash.
+
+The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe and blocked unless this value is set.
+
+`unsafe-eval` also applies to functions other than `eval()`; it applies to `new Function()` and `setTimeout()` as well because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
+
 ## CSP Keywords and Directives
-
-
-
-A CSP header allows us to define a whitelist of approved sources for a given resource, giving us very fine control over the origins from which web resources can be loaded (including our own).
-
-A CSP applies to a single web page only, it can be unique for a single page or consistent across an entire site. CSPs can also be combined; in the case of multiple CSPs, browsers will attempt to honor all of them. Note that the policy can only get more restrictive, not less, if multiple CSP headers are specified.
 
 There are a few keywords, such as `'self'`, that have special meaning.
 
@@ -129,16 +150,6 @@ data:           | Allows loading resources via the data scheme such as a base 64
 https:          | Restrict resources to https:
 `nonce-`        | script or style tags can be evaluated if their `nonce` attribute matches the header value `<script nonce="f8uz0jlZq41ljc">alert('Hello World!')</script>`
 `sha256-`       | Allow a script or style to execute if it matches the specified sha256 hash.
-
-### Why is the use of inline JavaScript and CSS considered unsafe?
-
-Browsers do not have any way to tell trusted from untrusted inline code; they cannot see the difference between your inline and code and unsafe code from an attacker that may have been rendered into the page without being properly sanitized.
-
-Therefore, when a CSP is enabled and the `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'` directives are not specified, inline JavaScript and CSS evaluation are blocked.
-
-The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe and blocked unless this value is set.
-
-`unsafe-eval` also applies to functions other than `eval()`; it also applies to `new Function()` and `setTimeout()` because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
 
 CSPs can include any of the following directives
 
@@ -161,9 +172,7 @@ upgrade-insecure-requests | Instructs browsers to re-write URLs from http to htt
 
 ## Leveraging CSP to Defend Against XSS Attacks
 
-HTML `style` attributes as well as `<style>` tags are considered inline styles and will not be evaluated unless the `style-src: 'unsafe-inline'` directive is specified.
 
-HTML `onclick`, `onhover`, `onload`, `onerror` and similar attributes as well as `<script>` tags are considered inline script and will not be evaluated unless the `script-src: 'unsafe-inline'` directive is specified.
 
 ## CSP Report-Only Mode
 
