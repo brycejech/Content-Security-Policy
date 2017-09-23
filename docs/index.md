@@ -82,7 +82,7 @@ If you do not have access to set HTTP response headers on your server, a CSP can
 
 ## CSP Examples
 
-A CSP header allows us to define a whitelist of approved sources for a given resource, giving us very fine control over the origins from which web resources can be loaded (including our own).
+A CSP header allows us to define a whitelist of approved sources from which any given resource type may be loaded, giving us very fine control over the origins from which web resources can be loaded (including our own).
 
 A CSP applies to a single web page only, it can be unique for a single page or consistent across an entire site. CSPs can also be combined; in the case of multiple CSPs, browsers will attempt to honor all of them. Note that if multiple CSP headers are specified, the policy can only get more restrictive, not less.
 
@@ -130,13 +130,17 @@ Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'
 
 Browsers do not have any way to tell trusted from untrusted inline code; they cannot see the difference between your inline code and unsafe code from an attacker that may have been rendered into the page without being properly sanitized.
 
-Therefore, when a CSP is enabled and the `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'` directives are not specified, inline JavaScript and CSS evaluation are blocked.
+#### What makes styles or scripts 'inline'
 
-HTML `style` attributes as well as `<style>` tags are considered inline styles and will not be evaluated unless the `style-src: 'unsafe-inline'` directive is specified.
+Scripts are considered inline if they are a part of a `<script>` tag that is not loaded via the `src` attribute. `onclick`, `onhover`, `onload`, `onerror` and other similar HTML attributes that can contain JavaScript code are also considered inline.
 
-HTML `onclick`, `onhover`, `onload`, `onerror` and similar attributes are considered inline script and are not evaluated unless the `script-src 'unsafe-inline'` directive is specified. `<script>` tags are also considered inline script and follow the same rule. However, an inline script tag may also be evaluated if it has a valid `nonce-` value, or if it matches an already specified `sha256-` hash.
+HTML `style` attributes as well as `<style>` elements are considered inline style.
 
-The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe and blocked unless this value is set.
+When a CSP is enabled and the `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'` directives are not specified, inline JavaScript and CSS evaluation are blocked. However, an inline script tag may also be evaluated if it has a valid `nonce-` attribute value, or if it matches an already specified `sha256-` hash.
+
+#### What about `'unsafe-eval'`?
+
+The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe because untrusted user input could make it's way into them. They are blocked and blocked unless the `'unsafe-eval'` value is set.
 
 `eval()`, `setTimeout(string)`, and `new Function()` are blocked because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
 
