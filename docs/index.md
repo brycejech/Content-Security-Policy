@@ -18,10 +18,6 @@ According to the Open Web Application Security Project (OWASP), XSS was the thir
 
 [XSS on MDN](https://developer.mozilla.org/en-US/docs/Glossary/Cross-site_scripting)
 
-### XSS Example
-
-A common example of an XSS attack is when an attacker is allowed to submit data to a server, typically as part of an HTTP POST or GET request, that is saved to a datastore and later interpreted (as HTML or JavaScript) on a webpage that other users (victims) will see. This is an example of a stored XSS Attack; other examples include Reflected XSS and Dom Based XSS.
-
 [XSS on OWASP](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS))
 
 ## What are HTTP headers?
