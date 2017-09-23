@@ -52,6 +52,19 @@ Currently, the most widely supported version of CSP is version 2. All of the key
 
 A CSP header allows us to define a whitelist of approved sources for a given resource.
 
+Let's look at a few simple examples, and explain what each does.
+
+```YAML
+# Restrict all content to the site's origin (excluding subdomains)
+Content-Security-Policy: default-src 'self'
+
+# Restrict JS and CSS to trusted.com and all it's subdomains, all other content restricted to the sites own origin
+# Note that values are not inherited. Any directive completely overwrites the default for that type of resource.
+# So, in this example, scripts and style would not be allowed inline or from the current origin, only trusted.com and any of it's subdomains
+Content-Security-Policy: default-src 'self'; script-src *.trusted.com; style-src *.trusted.com
+
+```
+
 There are a few keywords, such as `'self'`, that have special meaning.
 
 Keyword         | Meaning
