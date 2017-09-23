@@ -10,23 +10,7 @@ A content security policy allows us to instruct the browser on the origins from 
 
 A CSP should not be your only layer of defense against XSS attacks. User input should still never be trusted and always be sanitized. However, when leveraged correctly, a robust content security policy can be an extremely versatile addition to your defense in depth strategy.
 
-A CSP applies to a single web page only, it can be unique for a single page or consistent across an entire site. CSPs can also be combined; in the case of multiple CSPs, browsers will attempt to honor all of them. Note that the policy can only get more restrictive, not less, if multiple CSP headers are specified.
-
-A CSP gives us very fine control over the origins from which web resources can be loaded (including our own).
-
-To use a CSP, we must configure our server to return the `Content-Security-Policy` HTTP header:
-
-```yaml
-Content-Security-Policy: <policy>
-```
-
-If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag:
-
-```html
-<meta http-equiv="Content-Security-Policy" content="<policy>" />
-```
-
-### What is Cross Site Scripting (XSS)?
+## What is Cross Site Scripting (XSS)?
 
 Cross-site scripting (XSS) is a security exploit which allows an attacker to inject into a website malicious client-side code. This code is executed by the victim's browser and lets the attackers bypass access controls and impersonate users.
 
@@ -34,13 +18,13 @@ According to the Open Web Application Security Project (OWASP), XSS was the thir
 
 [XSS on MDN](https://developer.mozilla.org/en-US/docs/Glossary/Cross-site_scripting)
 
-#### XSS Example
+### XSS Example
 
 A common example of an XSS attack is when an attacker is allowed to submit data to a server, typically as part of an HTTP POST or GET request, that is saved to a datastore and later interpreted (as HTML or JavaScript) on a webpage that other users (victims) will see. This is an example of a stored XSS Attack; other examples include Reflected XSS and Dom Based XSS.
 
 [XSS on OWASP](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS))
 
-### What are HTTP headers?
+## What are HTTP headers?
 
 HTTP headers are part of an HTTP request or response, they convey additional information about the request/response. A header consists of it's case insensitive name followed by a colon, then it's value (without line breaks). Leading white space before the value is ignored.
 
@@ -50,31 +34,75 @@ Some common HTTP request headers include `Host`, `User-Agent`, `Referrer`, `Auth
 
 Some common HTTP response headers include `Server`, `Content-Type`, `Content-Length`, `Set-Cookie`, `Date`, `Expires`, and many others.
 
-## CSP Keywords and Directives
+## Using the `Content-Security-Policy` Header
 
-Currently, the most widely supported version of CSP is version 2\. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited, more on that later).
+Currently, the most widely supported version of CSP is version 2. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited; more on that later).
 
-A CSP header allows us to define a whitelist of approved sources for a given resource.
+To use a CSP, we must configure our server to return the `Content-Security-Policy` HTTP header:
 
-Let's look at a few simple examples, and explain what each does.
+```yaml
+Content-Security-Policy: <policy>
+```
+
+Here are some examples for setting the `Content-Security-Policy` header for popular webservers
+
+Server | Directive | Location
+------ | --------- | --------
+Nginx | `add_header Content-Security-Policy "<policy>";` | In the `server{ }` block in the `nginx.conf` file
+Apache | `Header set Content-Security-Policy "<policy>"` | In the `httpd.conf` file for the host or an `.htaccess` file
+
+For IIS add the following to your `<system.webServer>` node in your `web.config` file:
+```xml
+<system.webServer>
+    <httpProtocol>
+        <customHeader>
+            <add name="Content-Security-Policy" value="<policy>" />
+        </customHeader>
+    </httpProtocol>
+</system.webServer>
+```
+
+If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag:
+
+```html
+<meta http-equiv="Content-Security-Policy" content="<policy>" />
+```
+
+
+
+## CSP Examples
+
+Before we look at a comprehensive list of CSP keywords and directives, let's look at a few examples.
 
 ```yaml
 # Restrict all content to the site's origin (excluding subdomains)
 Content-Security-Policy: default-src 'self'
+```
 
-# Restrict JS and CSS to trusted.com and all it's subdomains, all
-# other content restricted to the sites own origin
-# Note that values are not inherited. Any directive completely
+```yaml
+# Restrict JS and CSS to trusted.com and all it's subdomains, all other content restricted
+# to the sites own origin
+# Note that values are not inherited from the `default-src`. Any directive completely
 # overwrites the default for that type of resource.
-# So, in this example, scripts and style would not be allowed inline or
-# from the current origin, only trusted.com and any of it's subdomains
+# So, in this example, scripts and style would not be allowed inline or from the current
+# origin, only trusted.com and any of it's subdomains
 Content-Security-Policy: default-src 'self'; script-src *.trusted.com; style-src *.trusted.com
+```
 
+```yaml
 # A more restrictive example.
 # This would allow scripts, styles, and images to load from the
 # current origin, and block everything else
 Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'
 ```
+
+## CSP Keywords and Directives
+
+
+
+A CSP header allows us to define a whitelist of approved sources for a given resource, giving us very fine control over the origins from which web resources can be loaded (including our own).
+
+A CSP applies to a single web page only, it can be unique for a single page or consistent across an entire site. CSPs can also be combined; in the case of multiple CSPs, browsers will attempt to honor all of them. Note that the policy can only get more restrictive, not less, if multiple CSP headers are specified.
 
 There are a few keywords, such as `'self'`, that have special meaning.
 
@@ -82,14 +110,22 @@ Keyword         | Meaning
 --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------
 'none'          | Matches nothing
 'self'          | Refers to the current origin (excluding subdomains)
-'unsafe-inline' | Allows inline JS and CSS
-'unsafe-eval'   | Allows text to be evaluated as JS
+'unsafe-inline' | Allows inline JS and CSS (unsafe)
+'unsafe-eval'   | Allows text to be evaluated as JS (unsafe)
 data:           | Allows loading resources via the data scheme such as a base 64 image src
 https:          | Restrict resources to https:
-`nonce-`        | script or style tags can be evaluated if their `nonce` attribute matches the header value `<script nonce="1234qwerasdf">alert('Hello World!')</script>`
+`nonce-`        | script or style tags can be evaluated if their `nonce` attribute matches the header value `<script nonce="f8uz0jlZq41ljc">alert('Hello World!')</script>`
 `sha256-`       | Allow a script or style to execute if it matches the specified sha256 hash.
 
-Note that inline JavaScript and CSS as well as the use of function calls such as eval are considered unsafe and prefixed accordingly. Note that `unsafe-eval` also applies to functions other than `eval()`; it also applies to `new Function()` and `setTimeout()` because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
+### Why is the use of inline JavaScript and CSS considered unsafe?
+
+Browsers do not have any way to tell trusted from untrusted inline code; they cannot see the difference between your inline and code and unsafe code from an attacker that may have been rendered into the page without being properly sanitized.
+
+Therefore, when a CSP is enabled and the `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'` directives are not specified, inline JavaScript and CSS evaluation are blocked.
+
+The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe and blocked unless this value is set.
+
+`unsafe-eval` also applies to functions other than `eval()`; it also applies to `new Function()` and `setTimeout()` because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
 
 CSPs can include any of the following directives
 
