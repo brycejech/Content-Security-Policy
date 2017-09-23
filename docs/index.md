@@ -68,13 +68,13 @@ In your `web.config` file, add the following to your `<system.webServer>` node:
 </system.webServer>
 ```
 
+Popular web frameworks also usually provide interfaces through which you can set custom headers. However, if you plan to have a single policy for your entire site, the recommended approach would be to add the `Content-Security-Policy` header directly via the web server.
+
 If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="<your policy>" />
 ```
-
-
 
 ## CSP Examples
 
