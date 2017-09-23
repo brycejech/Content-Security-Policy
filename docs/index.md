@@ -142,7 +142,7 @@ The `script-src 'unsave-eval'` directive allows the use of text to JavaScript fu
 
 ## CSP Keywords and Directives
 
-There are a few keywords, such as `'self'`, that have special meaning.
+### Keywords
 
 Keyword         | Meaning
 --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ https:          | Restrict resources to https:
 `nonce-`        | script or style tags can be evaluated if their `nonce` attribute matches the header value `<script nonce="f8uz0jlZq41ljc">alert('Hello World!')</script>`
 `sha256-`       | Allow a script or style to execute if it matches the specified sha256 hash.
 
-CSPs can include any of the following directives
+### Directives
 
 Directive                 | Meaning
 ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
