@@ -46,13 +46,13 @@ Content-Security-Policy: <policy>
 In the `server{ }` block in the `nginx.conf` file, add the following:
 
 ```Nginx
-add_header Content-Security-Policy "<policy>";
+add_header Content-Security-Policy "<your policy>";
 ```
 
 #### Apache
 In the `httpd.conf` file for the host or in an `.htaccess` file, add:
 ```Apache
-Header set Content-Security-Policy "<policy>"
+Header set Content-Security-Policy "<your policy>"
 ```
 
 #### IIS
@@ -62,7 +62,7 @@ In your `web.config` file, add the following to your `<system.webServer>` node:
 <system.webServer>
     <httpProtocol>
         <customHeader>
-            <add name="Content-Security-Policy" value="<policy>" />
+            <add name="Content-Security-Policy" value="<your policy>" />
         </customHeader>
     </httpProtocol>
 </system.webServer>
@@ -71,7 +71,7 @@ In your `web.config` file, add the following to your `<system.webServer>` node:
 If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag:
 
 ```html
-<meta http-equiv="Content-Security-Policy" content="<policy>" />
+<meta http-equiv="Content-Security-Policy" content="<your policy>" />
 ```
 
 
