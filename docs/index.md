@@ -68,7 +68,7 @@ In your `web.config` file, add the following to your `<system.webServer>` node:
 </system.webServer>
 ```
 
-Popular web frameworks also usually provide interfaces through which you can set custom headers. However, if you plan to have a single policy for your entire site, the recommended approach would be to add the `Content-Security-Policy` header directly via the web server.
+Popular web frameworks also provide interfaces through which you can set custom headers. However, if you plan to have a single policy for your entire site, the recommended approach would be to add the `Content-Security-Policy` header directly via the web server.
 
 If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag:
 
@@ -86,14 +86,14 @@ Content-Security-Policy: default-src 'self';
 ```
 
 ```yaml
-# Restrict JS and CSS to trusted.com and all it's subdomains, all other content restricted
-# to the sites own origin
-# Note that values are not inherited from the `default-src`. Any directive completely
-# overwrites the default for that type of resource.
-# So, in this example, scripts and style would not be allowed inline or from the current
-# origin, only trusted.com and any of it's subdomains
-Content-Security-Policy: default-src 'self'; script-src *.trusted.com; style-src *.trusted.com
+# Restrict JS to https: via trusted.com (including subdomains)
+# Restrict CSS to https: via trusted.com (including subdomains) or the current origin
+# All other content restricted to https: via the current origin
+
+Content-Security-Policy: default-src https: 'self'; script-src https: *.trusted.com; style-src https: 'self' *.trusted.com;
 ```
+
+Note that values are not inherited from the `default-src` directive. Any directive completely overwrites the default for that type of resource. So, in the previous example, we had to re-declare `https:` for both the `style-src` and `script-src` directives, as well as re-declare `'self'` in the `style-src` directive. The `default-src` directive is used as a fallback for other directives that are not explicitly declared elsewhere.
 
 ```yaml
 # Scripts may only be loaded via https from the /js/ folder on mydomain.com
