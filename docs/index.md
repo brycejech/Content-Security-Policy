@@ -82,7 +82,7 @@ Before we look at a comprehensive list of CSP keywords and directives, let's loo
 
 ```yaml
 # Restrict all content to the site's origin (excluding subdomains)
-Content-Security-Policy: default-src 'self'
+Content-Security-Policy: default-src 'self';
 ```
 
 ```yaml
@@ -93,6 +93,13 @@ Content-Security-Policy: default-src 'self'
 # So, in this example, scripts and style would not be allowed inline or from the current
 # origin, only trusted.com and any of it's subdomains
 Content-Security-Policy: default-src 'self'; script-src *.trusted.com; style-src *.trusted.com
+```
+
+```yaml
+# Scripts may only be loaded via https from the /js/ folder on mydomain.com
+# Styles may only be loaded via https from the /style/ folder on mydomain.com
+# All other resources must be loaded via https from the current site's origin
+Content-Security-Policy: default-src https: 'self'; script-src https://mydomain.com/js/; style-src https://mydomain.com/style/;
 ```
 
 ```yaml
