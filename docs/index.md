@@ -44,14 +44,24 @@ To use a CSP, we must configure our server to return the `Content-Security-Polic
 Content-Security-Policy: <policy>
 ```
 
-Here are some examples for setting the `Content-Security-Policy` header for popular webservers
+### Setting the `Content-Security-Policy` header in popular web servers
 
-Server | Directive | Location
------- | --------- | --------
-Nginx | `add_header Content-Security-Policy "<policy>";` | In the `server{ }` block in the `nginx.conf` file
-Apache | `Header set Content-Security-Policy "<policy>"` | In the `httpd.conf` file for the host or an `.htaccess` file
+#### Nginx
+In the `server{ }` block in the `nginx.conf` file, add the following:
 
-For IIS add the following to your `<system.webServer>` node in your `web.config` file:
+```Nginx
+add_header Content-Security-Policy "<policy>";
+```
+
+#### Apache
+In the `httpd.conf` file for the host or in an `.htaccess` file, add:
+```Apache
+Header set Content-Security-Policy "<policy>"
+```
+
+#### IIS
+
+In your `web.config` file, add the following to your `<system.webServer>` node:
 ```xml
 <system.webServer>
     <httpProtocol>
