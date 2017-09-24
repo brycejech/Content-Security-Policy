@@ -6,9 +6,9 @@ Content Security Policy (CSP) is an added layer of security that helps to detect
 
 [Content Security Policy on MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 
-A content security policy allows us to instruct the browser on the origins from which scripts, styles, images, iframes, and other web resources are allowed to be loaded and executed for any given web page.
+A content security policy allows us to instruct the browser on the origins from which scripts, styles, images, frames, and other web resources are allowed to be loaded and executed for any given web page.
 
-A CSP should not be your only layer of defense against XSS attacks. User input should still never be trusted and always be sanitized. However, when leveraged correctly, a robust content security policy can be an extremely versatile addition to your defense in depth strategy.
+A CSP should not be your only layer of defense against XSS attacks. User input still should never be trusted and always be properly sanitized. However, when leveraged correctly, a robust content security policy can be an extremely versatile addition to your defense in depth strategy.
 
 ## What is Cross Site Scripting (XSS)?
 
@@ -32,7 +32,7 @@ Some common HTTP response headers include `Server`, `Content-Type`, `Content-Len
 
 ## Using the `Content-Security-Policy` Header
 
-Currently, the most widely supported version of CSP is version 2\. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited; more on that later).
+Currently, the most widely supported version of CSP is version 2. All of the keywords and directives mentioned here are supported in this CSP version (though browser support is sometimes limited; more on that later).
 
 To use a CSP, we must configure our server to return the `Content-Security-Policy` HTTP header:
 
@@ -72,7 +72,7 @@ In your `web.config` file, add the following to your `<system.webServer>` node:
 </system.webServer>
 ```
 
-Popular web frameworks also provide interfaces through which you can set custom headers. However, if you plan to have a single policy for your entire site, the recommended approach would be to add the `Content-Security-Policy` header directly via the web server.
+Popular web frameworks also provide interfaces through which you can set custom headers. However, if you plan to have a singular policy for your entire site, the recommended approach would be to add the `Content-Security-Policy` header directly via the web server.
 
 If you do not have access to set HTTP response headers on your server, a CSP can also be specified with an HTML `<meta>` tag inside the document `<head>`:
 
