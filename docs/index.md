@@ -140,9 +140,9 @@ When a CSP is enabled and the `script-src 'unsafe-inline'` or `style-src 'unsafe
 
 #### What about `'unsafe-eval'`?
 
-The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe because untrusted user input could make it's way into them. They are blocked and blocked unless the `'unsafe-eval'` value is set.
+The `script-src 'unsave-eval'` directive allows the use of text to JavaScript functions such as `eval(string)`, `setTimeout(string)`, and `new Function()`. They are also considered unsafe because untrusted user input could make it's way into them. They are blocked unless the `'unsafe-eval'` value is set.
 
-`eval()`, `setTimeout(string)`, and `new Function()` are blocked because strings can be passed to these functions and evaluated as JavaScript code. When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
+When using `setTimeout()`, only the string evaluation is blocked, if you pass `setTimeout()` an inline function, it will still work as expected
 
 ## CSP Keywords and Directives
 
@@ -181,11 +181,42 @@ report-uri                | URL to which the browser will POST policy violations
 upgrade-insecure-requests | Instructs browsers to re-write URLs from http to https (useful for legacy sites with a lot of URLs that need to be re-written)
 
 
+## Testing a policy with report-only mode
+
+You may also supply a `Content-Security-Policy-Report-Only: <policy>` header, which will cause the browser to report on policy violations via the console as well as `POST` report violations to a `report-uri` (if specified) without blocking resources from loading or executing.
+
+This feature can be used to help you fine-tune your policy. It can be used to test out new directives without making them part of the enforced policy, giving you time to address issues without breaking site functionality.
+
 ## Using the `report-uri` directive to collect policy violations
 
+The `report-uri` directive is extremely useful for collecting information on report violations. There may be resources that we missed or an attacker actively trying to exploit an XSS attack vector. Aside from logged violations in the console, without policy violation reporting, we are left in the dark as to which directives may be being violated.
 
+The `report-uri` directive is used to specify a URL to which the browser should `POST` a JSON formatted violation report in the event that it acts on the CSP.
 
-## CSP Report-Only Mode
+Consider the following policy:
+
+```yaml
+Content-Security-Policy: default-src https: 'self'; report-uri https://cspreport.mydomain.com;
+```
+
+Let's say that on a page at `https://mydomain.com/index.html` that is subject to this policy we have the following `img` tag: `<img src="http://mydomain.com/favicon.ico" />`.
+
+Upon detecting that this resource is in violation of the policy, the browser will `POST` a JSON formatted report similar to this:
+
+```json
+{
+    "csp-report": {
+        "document-uri": "https://mydomain.com/index.html",
+        "referrer": "",
+        "blocked-uri": "http://mydomain.com/favicon.ico",
+        "violated-directive": "default-src https: 'self'",
+        "original-policy": "default-src https: 'self'; report-uri https://cspreport.mydomain.com;"
+    }
+}
+```
+
+The endpoint at `https://cspreport.mydomain.com` should capture this data and log it for later use. You can then use the data to identify the pages and resources which are most frequently violating the policies (high traffic) and address them first, then move on to violations that are seeing less traffic.
+
 
 ## Browser Support
 
